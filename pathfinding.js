@@ -3,6 +3,8 @@
  * Finds multiple route alternatives with different priorities
  */
 
+// Transport modes removed - uses any available path
+
 class PriorityQueue {
     constructor() {
         this.items = [];
@@ -105,6 +107,8 @@ function astar(graph, nodes, startId, endId, weightFactor = 0.5) {
         return null;
     }
     
+    // No transport mode restrictions
+    
     const heuristic = getDistance(startNode.lat, startNode.lon, endNode.lat, endNode.lon) / 1000;
     openSet.enqueue(startId, heuristic);
 
@@ -143,9 +147,25 @@ function astar(graph, nodes, startId, endId, weightFactor = 0.5) {
                 continue;
             }
             
+            // No highway type restrictions - use all edges
+            
             // Cost = combination of distance and safety
             const distanceCost = edge.length_m / 1000; // Convert to km
-            const safetyCost = edge.weight;
+            
+            // Get adjusted safety cost based on crime events
+            const currentNode = nodes[current];
+            const neighborNode = nodes[neighbor];
+            let safetyCost = edge.weight;
+            
+            console.log(`      🧪 Function check: ${typeof window.getAdjustedEdgeWeight}, currentNode: ${!!currentNode}, neighborNode: ${!!neighborNode}`);
+            
+            // Apply dynamic crime event adjustments if function is available
+            if (typeof window.getAdjustedEdgeWeight === 'function' && currentNode && neighborNode) {
+                const originalWeight = edge.weight;
+                safetyCost = window.getAdjustedEdgeWeight(edge.weight, currentNode, neighborNode);
+                console.log(`      🎯 Applied adjustment: ${originalWeight.toFixed(2)} → ${safetyCost.toFixed(2)}`);
+            }
+            
             console.log(`      🔍 About to read gScore[${current}] - value is: ${gScore[current]}`);
             console.log(`      🔑 gScore keys:`, Object.keys(gScore));
             const currentG = gScore[current] ?? Infinity;  // Use ?? instead of || to handle 0 correctly

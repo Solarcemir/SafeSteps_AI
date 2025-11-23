@@ -46,61 +46,173 @@ risk_normalized = (risk - min) / (max - min)  # Normalize to 0-1
 
 ### 2. **Intersection (Node) Weight Calculation**
 
-Each of the **11,495 intersections** gets a weight based on:
+Each of the **11,495 intersections** gets a weight based on **4 key features**:
+
+#### **Feature Extraction Per Intersection**
 
 ```python
-# Features extracted per intersection:
-1. Neighborhood risk score (0-1)
-2. POI density within 100m radius
-3. Number of streets meeting at intersection
-4. Street type (highway, residential, etc.)
+# 1. Neighborhood Crime Risk (via spatial join)
+# Uses point-in-polygon to find which neighborhood contains this intersection
+for neighborhood_polygon in neighborhoods:
+    if neighborhood_polygon.contains(intersection_point):
+        risk_score = neighborhood_risk[neighborhood_name]  # 0-1 normalized
+        break
 
-# Weight formula:
-base_weight = 10  # minimum safe weight
-risk_factor = neighborhood_risk * 50  # scale risk 0-50
-poi_factor = num_pois_nearby * 2  # more POIs = more activity
-street_factor = num_streets * 3  # busier intersections
+# 2. POI Density (Points of Interest within 100m)
+# Counts restaurants, shops, bars, etc. using spatial grid optimization
+buffer_radius = 0.001  # ~100 meters in degrees
+num_pois = count_pois_within_radius(intersection, buffer_radius)
+poi_density = min(num_pois / 50.0, 1.0)  # Normalized, capped at 50
 
-intersection_weight = base_weight + risk_factor + poi_factor + street_factor
+# 3. Street Type Importance (average of connected streets)
+# Different street types have different priority values:
+highway_priorities = {
+    'motorway': 1.0,      # Highest exposure
+    'trunk': 0.9,
+    'primary': 0.8,
+    'secondary': 0.7,
+    'tertiary': 0.6,
+    'residential': 0.4,
+    'service': 0.2,
+    'footway': 0.1        # Lowest exposure
+}
+avg_street_priority = mean([priority for street in connected_streets])
+
+# 4. Intersection Degree (complexity)
+# Number of streets meeting at this intersection
+degree = len(connected_streets)
+degree_normalized = min(degree / 8.0, 1.0)  # Normalized, capped at 8
 ```
 
-**Weight Distribution:**
-- Low (< 25): 4,772 intersections 🟢
-- Medium (25-45): 5,339 intersections 🟡
-- High (> 45): 1,384 intersections 🔴
+#### **Weight Formula**
 
-**Example:**
-- **Yonge-Bay Corridor intersection**: Weight 84.0 (high crime area + 73 POIs + 4 streets)
-- **North Riverdale intersection**: Weight 11.86 (low crime area + 0 POIs + 2 streets)
+```python
+# Weighted combination of all features:
+weight_components = {
+    'crime_rate': risk_score × 40%,              # Neighborhood crime (most important)
+    'poi_density': poi_density × 20%,            # Local activity level
+    'street_importance': avg_street_priority × 20%,  # Road exposure
+    'degree': degree_normalized × 20%            # Intersection complexity
+}
+
+total_weight = sum(weight_components.values())
+
+# Scale to meaningful range (0-100)
+final_weight = total_weight × 100
+```
+
+#### **Weight Categorization**
+
+| Range | Category | Color | Count | Description |
+|-------|----------|-------|-------|-------------|
+| 0-30 | Low | 🟢 Green | 4,772 | Safe residential areas, low crime |
+| 30-60 | Medium | 🟡 Yellow | 5,339 | Mixed areas, moderate activity |
+| 60-100 | High | 🔴 Red | 1,384 | High crime areas, busy intersections |
+
+#### **Real Examples**
+
+**Example 1: High-Risk Intersection**
+- **Location**: Yonge & Dundas (Downtown Core)
+- **Neighborhood**: Yonge-Bay Corridor (risk: 0.95)
+- **POIs nearby**: 73 (bars, restaurants, shops)
+- **Streets**: 4-way intersection (primary roads)
+- **Calculation**:
+  ```
+  crime:     0.95 × 40% = 38.0
+  poi:       1.00 × 20% = 20.0  (73/50 capped at 1.0)
+  street:    0.80 × 20% = 16.0  (primary road)
+  degree:    0.50 × 20% = 10.0  (4 streets / 8)
+  -----------------------------------
+  Total:     84.0 → 🔴 High Risk
+  ```
+
+**Example 2: Low-Risk Intersection**
+- **Location**: Quiet residential corner in North Riverdale
+- **Neighborhood**: North Riverdale (risk: 0.12)
+- **POIs nearby**: 0
+- **Streets**: Simple 2-way (residential)
+- **Calculation**:
+  ```
+  crime:     0.12 × 40% = 4.8
+  poi:       0.00 × 20% = 0.0
+  street:    0.40 × 20% = 8.0   (residential)
+  degree:    0.25 × 20% = 5.0   (2 streets / 8)
+  -----------------------------------
+  Total:     17.8 → 🟢 Low Risk
+  ```
 
 ### 3. **Edge (Street) Weight Calculation**
 
-Each of the **13,195 street segments** connecting intersections:
+Each of the **13,195 street segments** (edges) connects two intersections (nodes). The edge inherits the average weight of its endpoints.
 
 ```python
-# Edge weight combines:
-1. Average weight of connected nodes
-2. Street length (longer = more exposure)
+# Get the two nodes connected by this street
+start_node = nodes[edge_start_id]
+end_node = nodes[edge_end_id]
 
-start_weight = nodes[start_intersection]['weight']
-end_weight = nodes[end_intersection]['weight']
-avg_node_weight = (start_weight + end_weight) / 2
+# Average their weights
+edge_weight = (start_node['weight'] + end_node['weight']) / 2
 
-length_m = street_length_in_meters
-
-# Final edge weight
-edge_weight = avg_node_weight × (1 + length_m / 1000)
+# Store with street metadata
+edge = {
+    'source': edge_start_id,
+    'target': edge_end_id,
+    'weight': edge_weight,
+    'length_m': street_length_meters,
+    'name': street_name,
+    'highway_type': street_type
+}
 ```
 
-**Edge Distribution:**
-- Low risk (< 50): 9,571 edges 🟢
-- Medium risk (50-100): 3,614 edges 🟡
-- High risk (> 100): 10 edges 🔴
+#### **Why Average the Endpoints?**
 
-**Why this formula?**
-- Captures risk at both ends of the street
-- Longer streets = more time exposed to risk
-- Normalized by kilometers for balanced weighting
+Streets represent **transitions** between two points:
+- Starting at Node A (weight 60)
+- Ending at Node B (weight 80)
+- Walking this street exposes you to **both risk levels**
+- Average (70) represents the **overall exposure** along the route
+
+#### **Edge Distribution**
+
+| Weight Range | Risk Level | Count | Percentage |
+|--------------|------------|-------|------------|
+| 12-30 | Low 🟢 | 9,571 | 72.5% |
+| 30-70 | Medium 🟡 | 3,614 | 27.4% |
+| 70-129 | High 🔴 | 10 | 0.1% |
+
+#### **Real Examples**
+
+**Example 1: High-Risk Street**
+- **Street**: Dundas St E segment near Yonge
+- **Start Node**: Weight 84.0 (Yonge & Dundas intersection)
+- **End Node**: Weight 78.5 (Next intersection east)
+- **Edge Weight**: (84.0 + 78.5) / 2 = **81.25** 🔴
+- **Length**: 127 meters
+- **Visualization**: Bright red line on map
+
+**Example 2: Safe Street**
+- **Street**: Residential side street in North Riverdale
+- **Start Node**: Weight 17.8 (quiet corner)
+- **End Node**: Weight 19.2 (another quiet corner)
+- **Edge Weight**: (17.8 + 19.2) / 2 = **18.5** 🟢
+- **Length**: 89 meters
+- **Visualization**: Green line on map
+
+#### **Routing Implications**
+
+When calculating the **safest route** using A* algorithm:
+
+```python
+# For each edge in the path:
+route_cost = distance_cost × (1 - safety_weight) + safety_cost × safety_weight
+
+# With safety_weight = 0.9 (90% safety priority):
+# - Edge with weight 18.5 → LOW cost (preferred)
+# - Edge with weight 81.25 → HIGH cost (avoided)
+
+# The algorithm will choose longer but safer routes
+# avoiding high-weight edges even if they're shorter
+```
 
 ## 📁 Project Structure
 

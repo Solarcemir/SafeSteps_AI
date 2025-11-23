@@ -266,14 +266,27 @@ body {
     color: #fff;
     border: 1px solid #00ff88;
     border-radius: 8px;
+    max-width: 50vh !important;
+    min-width: 50vh;
+        overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 .leaflet-popup-content {
-    margin: 15px;
+    margin: 0px;
+    min-width: 100%;
+    max-width: 100% !important;
+    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 .leaflet-popup-tip {
     background: rgba(0, 0, 0, 0.9);
+        overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 .popup-title {
@@ -281,16 +294,25 @@ body {
     font-weight: bold;
     font-size: 16px;
     margin-bottom: 10px;
+        overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 .popup-stat {
     margin: 5px 0;
     font-size: 14px;
+        overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 .popup-stat span {
     color: #00ff88;
     font-weight: bold;
+        overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 /* DEMO: Risk Score Display Styles (commented out for future use)
@@ -694,4 +716,24 @@ body {
         bottom: 10px;
         max-width: calc(100% - 20px);
     }
+}
+
+/* Crime Event Marker Animation */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 15px rgba(255, 68, 68, 0.8), 0 0 30px rgba(255, 68, 68, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(255, 68, 68, 1), 0 0 50px rgba(255, 68, 68, 0.6);
+        transform: scale(1.1);
+    }
+    100% {
+        box-shadow: 0 0 15px rgba(255, 68, 68, 0.8), 0 0 30px rgba(255, 68, 68, 0.4);
+        transform: scale(1);
+    }
+}
+
+.crime-event-marker {
+    animation: pulse 2s infinite;
 }
