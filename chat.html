@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeRoute AI - Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>SafeRoute AI Chat</h1>
+
+<div class="chat-input-section">
+    <label>Street Name:</label>
+    <input id="streetInput" placeholder="Enter street...">
+
+    <label>Time:</label>
+    <input id="timeInput" placeholder="e.g. 9:00 PM">
+
+    <button onclick="askAI()">Ask AI</button>
+</div>
+
+<div id="ai-response" class="ai-response"></div>
+
+<script>
+async function askAI() {
+    let street = document.getElementById("streetInput").value;
+    let time = document.getElementById("timeInput").value;
+
+    let res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ street, time })
+    });
+
+    let data = await res.json();
+    document.getElementById("ai-response").innerHTML = `<p>${data.reply}</p>`;
+}
+</script>
+
+</body>
+</html>
