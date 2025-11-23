@@ -695,3 +695,23 @@ body {
         max-width: calc(100% - 20px);
     }
 }
+
+.go-chat-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 180px;
+    padding: 12px;
+    background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: none;
+    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+}
+
