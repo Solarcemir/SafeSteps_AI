@@ -53,7 +53,7 @@ def fetch_gta_updates():
 
     return incidents
 
-async def chat():
+async def chat(user_input, incidents):
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
     model = "gemini-flash-latest"
 
@@ -79,7 +79,11 @@ async def chat():
                 If the user is 'Walking', alert it of incidents no longer than 7 hours ago.
                 If the user is 'Bicycle Riding', alert if of incidents no longer than 5 hours ago.
                 If no incident is related, just say 'Area is Safe: No recent incidents reported.'
-                Response should be straight forward and customized for the user.
+                Response should be straight forward and customized for the user
+                Split your output as:
+                ANSWER: <text to user>
+                COORDS: <list of coords of relevant incidents>
+                NEWS: <recent news list>.
                 """
             )
         ]
@@ -94,22 +98,22 @@ async def chat():
             print(chunk.text, end="")
             response_text += chunk.text
 
-    return response_text
+    # Split the response into 3 parts (simple parsing)
+    answer, coords, news = "","",""
+    try:
+        parts=response_text.split("COORDS:")
+        answer=parts[0].replace("ANSWER:","").strip()
+        parts2=parts[1].split("NEWS:")
+        coords=parts2[0].strip()
+        news=parts2[1].strip()
+    except:
+        answer=response_text
+
+    return {"answer":answer, "coords":coords, "recent_news":news}
 
 if __name__ == "__main__":
-    # Read JSON input from stdin
-    input_data = json.load(sys.stdin)
-    street = input_data.get("street", "")
-    time = input_data.get("time", "")
-    situation = input_data.get("situation", "")
-
-    # Construct user_input for Gemini
-    user_input = f"Street: {street}, Time: {time}, Situation: {situation}"
-
-    incidents = fetch_gta_updates()
-
-    # Run Gemini chat
-    response_text = asyncio.run(chat(user_input, incidents))
-
-    # Output JSON so Node server can read it
-    print(json.dumps({"reply": response_text}))
+    input_data=json.load(sys.stdin)
+    question=input_data.get("question","")
+    incidents=fetch_gta_updates()
+    response_json=asyncio.run(chat(question, incidents))
+    print(json.dumps(response_json))

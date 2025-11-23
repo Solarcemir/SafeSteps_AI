@@ -35,9 +35,18 @@ const server = http.createServer((req, res) => {
 
             let result = '';
             python.stdout.on('data', data => result += data.toString());
-            python.on('close', () => {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(result); // send Gemini response back to chat.js
+            python.stderr.on('data', data => console.error('Python error:', data.toString()));
+
+            python.on('close', code => {
+                try{
+                    const jsonData = JSON.parse(result);
+                    res.writeHead(200, {'Content-Type':'application/json'});
+                    res.end(JSON.stringify(jsonData));
+                }catch(err){
+                    console.error("JSON parse error:", err, "Python output:", result);
+                    res.writeHead(500, {'Content-Type':'application/json'});
+                    res.end(JSON.stringify({answer:"Error generating response", coords:[], recent_news:[]}));
+                }
             });
         });
         return; // skip static file handling

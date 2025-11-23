@@ -1,39 +1,24 @@
-// Populate hours (1-12)
-const hourSelect = document.getElementById("hour");
-for (let i = 1; i <= 12; i++) {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = i;
-    hourSelect.appendChild(option);
-}
+async function askAI() {
+    const question = document.getElementById("user-question").value;
 
-// Populate minutes (00-59)
-const minuteSelect = document.getElementById("minute");
-for (let i = 0; i < 60; i++) {
-    const option = document.createElement("option");
-    option.value = i.toString().padStart(2, "0");
-    option.textContent = i.toString().padStart(2, "0");
-    minuteSelect.appendChild(option);
-}
+    try {
+        const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question })
+        });
 
-// Your existing askAI() function can now read these values:
-function askAI() {
-    const street = document.getElementById("streetInput").value;
-    const hour = document.getElementById("hour").value;
-    const minute = document.getElementById("minute").value;
-    const ampm = document.getElementById("ampm").value;
-    const situation = document.getElementById("situation").value;
+        const data = await res.json();
 
-    const time = `${hour}:${minute} ${ampm}`;
+        // Display answer in chat.html
+        document.getElementById("ai-response").textContent = data.answer;
 
-    // Send to server
-    fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ street, time, situation })
-    })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("ai-response").textContent = data.reply;
-    });
+        // Send coords and recent_news to index.html (example: localStorage or global event)
+        localStorage.setItem("incident_coords", JSON.stringify(data.coords));
+        localStorage.setItem("recent_news", JSON.stringify(data.recent_news));
+
+        console.log("Coords and news stored for index.html:", data.coords, data.recent_news);
+    } catch (err) {
+        console.error("Fetch error:", err);
+    }
 }
