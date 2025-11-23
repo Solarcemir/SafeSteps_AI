@@ -70,20 +70,17 @@ async def chat(user_input, incidents):
         system_instruction=[
             types.Part.from_text(
                 text=f"""
-                You are an assistant that looks at recent events in the streets of Toronto.
-                Your task is to alert the user of any relevant incidents, based on what the user is currently doing.
-                The user can be either 'Driving/Bus Riding', 'Walking', or 'Bicycle Riding' on a specified street.
-                Respond ONLY this incident data: {incidents}
-                Do not make up anything.
-                If the user is 'Driving/Bus Riding', alert it of incidents no longer than 2 hours ago.
-                If the user is 'Walking', alert it of incidents no longer than 7 hours ago.
-                If the user is 'Bicycle Riding', alert if of incidents no longer than 5 hours ago.
-                If no incident is related, just say 'Area is Safe: No recent incidents reported.'
-                Response should be straight forward and customized for the user
-                Split your output as:
-                ANSWER: <text to user>
-                COORDS: <list of coords of relevant incidents>
-                NEWS: <recent news list>.
+                You are an assistant that looks at recent street incidents in Toronto.
+                The user will ask something related to a specific area in Toronto.
+                You will be given a list of recent incidents within the following data: {incidents}.
+                Based on the area the user inputs, you will read the provided dataset and identify any recent indicents in that area.
+                Additionally, try to find any related or extra information about the specific incidents mentioned in the dataset.
+                Do NOT make up information.
+                Format your response as a JSON.
+                Your JSON response should include and be split as:
+                1. Message: A list of all the incidents found on the area specified by the user, along with any extra information about the incident.
+                2. Longitud: The calculation of the longitud of the area inputed by the user.
+                3. Latitud: The calculation of the latitud of the area inputed by the user.
                 """
             )
         ]
