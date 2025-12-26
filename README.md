@@ -1,6 +1,57 @@
 # SafeRoute AI - Toronto Risk Map
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-v14+-green.svg)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-green.svg)](https://leafletjs.com/)
+
 **AI-powered safe route navigation system** using real Toronto crime data, live incident monitoring, OpenStreetMap infrastructure, and intelligent weight calculation for risk-aware pathfinding.
+
+---
+
+## 📋 Table of Contents
+
+- [Quick Start](#-quick-start)
+- [Project Overview](#-project-overview)
+- [Features](#-features)
+- [Demo](#-demo)
+- [How It Works](#-how-it-works)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Project Structure](#-project-structure)
+- [Technical Details](#-technical-details)
+- [API Configuration](#-api-configuration)
+- [Troubleshooting](#-troubleshooting)
+- [Future Roadmap](#-future-roadmap)
+- [Tech Stack](#-tech-stack)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## 🚀 Quick Start
+
+Get up and running in 3 minutes:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Solarcemir/SafeSteps_AI.git
+cd SafeSteps_AI
+
+# 2. Install Python dependencies
+pip install -r requirements.txt
+
+# 3. (Optional) Set up Gemini API key for live crime monitoring
+echo "GEMINI_API_KEY=your_api_key_here" > .env
+
+# 4. Start the server
+node server.js
+
+# 5. Open your browser
+# Navigate to http://localhost:3000
+```
+
+**That's it!** The map will load with historical crime data. Click "🤖 Fetch Live Crime Data" to see real-time incidents (requires API key).
 
 ---
 
@@ -48,27 +99,155 @@ Each street intersection receives a 0-100 safety score based on:
 - **Spatial Indexing**: Optimized POI lookups within 100m radius
 - **Boundary Visualization**: 158 neighborhood polygons rendered as GeoJSON layers
 
+### 5. **Interactive Web Interface**
+- **Dark Theme Map**: Optimized for nighttime use with CartoDB Dark Matter tiles
+- **Responsive Controls**: Easy layer toggling, route planning, and event reporting
+- **Real-Time Updates**: Dynamic incident markers and danger zones
+- **Detailed Popups**: Click any street or incident for comprehensive information
+
 ---
 
 ## 🎬 Demo
 
-### Usage
-1. **Open SafeRoute AI**: Navigate to `http://localhost:3000`
-2. **View Crime Heat Map**: Streets colored by safety score (green = safe, red = dangerous)
-3. **Fetch Live Incidents**: Click "🤖 Fetch Live Crime Data" button
-4. **AI Processing**: Wait ~10 seconds while Gemini AI analyzes latest crime reports
-5. **View Results**: 
-   - Map auto-pans to show all active incidents
-   - Red markers with 100m danger zones appear
-   - Popup displays all incidents with detailed descriptions
-   - Click individual markers for specific incident details
+### What You'll See
 
-### What You'll See:
-- 🟢 **Safe Streets**: Low crime neighborhoods (e.g., Lambton Baby Point)
-- 🟡 **Moderate Risk**: Mixed safety zones
-- 🔴 **High Risk**: Entertainment districts, high-crime areas (e.g., Yonge-Bay Corridor)
-- 🚨 **Active Incidents**: Live crime events with severity ratings (60-95%)
-- 📍 **Precise Locations**: GPS coordinates, street intersections, and neighborhood names
+When you first load SafeRoute AI at `http://localhost:3000`:
+
+#### Main Map View
+- **Dark-themed interactive map** centered on downtown Toronto
+- **Color-coded streets** showing safety levels:
+  - 🟢 **Green streets**: Safe areas (low crime) - e.g., residential neighborhoods
+  - 🟡 **Yellow streets**: Moderate risk - mixed commercial/residential
+  - 🟠 **Orange streets**: High risk - busy entertainment districts
+  - 🔴 **Red streets**: Critical risk - areas with high crime rates
+- **158 neighborhood boundaries** as transparent overlays
+- **Control panel** on the left with layer toggles and features
+
+#### Live Incident Demo
+1. Click "🤖 Fetch Live Crime Data" button
+2. Status message shows "Analyzing crime feeds with AI..."
+3. After ~10 seconds, the map updates with:
+   - **Red circular markers** at incident locations
+   - **100m danger zone circles** around each incident
+   - **Consolidated popup** listing all incidents by severity
+4. Click individual markers to see:
+   - Exact location (street intersection)
+   - Crime type (shooting, robbery, assault, etc.)
+   - Severity rating (60-95%)
+   - Detailed 2-3 sentence description
+   - Timestamp
+
+#### Example Live Incidents (Real Data)
+- **King St W & Spadina Ave**: Shooting incident, severity 95%
+- **Yonge & Dundas Square**: Armed robbery, severity 80%
+- **Front St & Jarvis St**: Aggravated assault, severity 75%
+
+#### Interactive Features Demo
+- **Click any street**: Popup shows weight, name, length, risk category
+- **Zoom in/out**: Streets remain visible and color-coded at all zoom levels
+- **Change crime filter**: Switch between "All Crimes", "Violent Crimes", "Property Crimes", etc.
+- **Plan route** (coming soon): Click two points to see safest vs shortest path
+
+### Screenshots
+
+*Note: Screenshots would be displayed here showing:*
+1. Main map with color-coded streets
+2. Live incident markers with danger zones
+3. Detailed popup for a crime incident
+4. Control panel with all options
+5. Route planning interface
+
+### Data Visualization
+
+The map displays **13,195 street segments** color-coded by safety score:
+
+| Color | Weight Range | Count | % of Total | Example Areas |
+|-------|--------------|-------|-----------|---------------|
+| 🟢 Green | 0-30 | 9,571 | 72.5% | Residential neighborhoods, quiet streets |
+| 🟡 Yellow | 30-60 | 3,614 | 27.4% | Mixed commercial/residential areas |
+| 🟠 Orange | 60-80 | 9 | 0.07% | Entertainment districts, busy intersections |
+| 🔴 Red | 80-100 | 1 | 0.01% | Yonge-Dundas area, high-crime zones |
+
+**Key Insights:**
+- **72.5%** of downtown Toronto streets are classified as "safe"
+- Only **0.1%** of streets have critical risk levels
+- Entertainment districts and major intersections tend to have higher weights
+- Residential side streets consistently show low risk scores
+
+---
+
+## 🎯 Usage
+
+Once the server is running at `http://localhost:3000`, you can:
+
+### Basic Features
+
+#### 1. **Explore the Crime Heat Map**
+- **Pan/Zoom:** Click and drag to move around Toronto, scroll to zoom
+- **Street Colors:** 
+  - 🟢 **Green** = Safe streets (low crime rate)
+  - 🟡 **Yellow** = Medium risk
+  - 🟠 **Orange** = High risk
+  - 🔴 **Red** = Critical risk (high crime area)
+- **Click any street** to see:
+  - Weight value (safety score)
+  - Street name and type
+  - Length in meters
+  - Risk category
+
+#### 2. **View Crime Data Layers**
+Use the layer selector to focus on specific crime types:
+- 🎯 **All Crimes (Weighted)** - Shows overall safety based on all crime types
+- ⚠️ **Violent Crimes** - Focuses on assault, robbery, shooting, homicide
+- 🏠 **Property Crimes** - Shows break & enter patterns
+- 👤 **Personal Safety** - Assault and robbery data
+- 🚗 **Vehicle Safety** - Auto theft zones
+- 🚲 **Bike Safety** - Bicycle theft hotspots
+- 🔴 **Critical** - Homicide and shooting incidents only
+
+#### 3. **Fetch Live Crime Incidents** (Requires API Key)
+1. Click the "🤖 Fetch Live Crime Data" button
+2. Wait ~10 seconds while AI processes latest crime reports
+3. View results:
+   - **Red markers** appear at incident locations
+   - **Danger zones** (100m radius circles) show impact area
+   - **Consolidated popup** displays all active incidents
+4. Click individual markers for detailed information:
+   - Exact location and intersection
+   - Crime type and severity (%)
+   - Detailed description of what happened
+   - Time of incident
+
+#### 4. **Plan Safe Routes** (Future Feature)
+1. Click "🗺️ Plan Safe Route" button
+2. Click on map to set:
+   - First click = **Start point (A)**
+   - Second click = **End point (B)**
+3. View route comparison:
+   - Safest route (green) - Avoids high-risk areas
+   - Shortest route (blue) - Direct path
+   - Statistics showing distance, time, safety score
+
+#### 5. **Report Crime Events** (Manual Markers)
+1. Click "🚨 Report Crime Event" button
+2. Select crime type from dropdown
+3. Click on map to place marker
+4. View all reported events
+5. Clear events with "🗑️ Clear All Events" button
+
+### Advanced Features
+
+#### View Street Network Details
+Click "🔍 Show Street Network" to see:
+- All intersection nodes (11,495 points)
+- Street edges (13,195 connections)
+- Weight distribution across the network
+
+#### Toggle Layers
+Use checkboxes to show/hide:
+- Crime data boundaries (158 neighborhoods)
+- Street network overlay
+- Live incident markers
 
 ---
 
@@ -310,52 +489,183 @@ route_cost = distance_cost × (1 - safety_weight) + safety_cost × safety_weight
 ## 📁 Project Structure
 
 ```
-├── index.html                    # Web interface
-├── app.js                        # Leaflet map + visualization logic
-├── style.css                     # Dark theme styling
-├── server.js                     # Node.js static file server
-├── package.json                  # Project configuration
+SafeSteps_AI/
 │
-├── Data Files:
-│   ├── Neighbourhood_Crime_Rates_*.csv        # Crime statistics (158 neighborhoods)
-│   ├── Neighbourhood_Crime_Rates_*.geojson    # Neighborhood boundaries
-│   ├── planet_*.osm.geojson.xz               # OpenStreetMap data (compressed)
-│   ├── downtown_streets.geojson              # 22,448 street segments
-│   ├── downtown_pois.geojson                 # 19,487 points of interest
-│   ├── intersection_weights.csv              # 11,495 weighted nodes
-│   ├── intersection_weights.geojson          # Nodes for visualization
-│   ├── routing_edges.csv                     # 13,195 weighted edges
-│   ├── routing_edges.geojson                 # Edges for visualization
-│   └── routing_graph.json                    # Complete graph structure
+├── Frontend (Web Interface)
+│   ├── index.html                     # Main web interface with map and controls
+│   ├── app.js                         # Leaflet map + visualization logic (2161 lines)
+│   ├── pathfinding.js                 # A* routing algorithm implementation
+│   ├── style.css                      # Dark theme styling
+│   ├── chat.html                      # AI chat interface for safety queries
+│   └── chat.js                        # Chat functionality
 │
-├── Python Scripts:
-│   ├── process_downtown_osm.py               # Extract streets/POIs from OSM
-│   ├── calculate_intersection_weights.py     # Calculate node weights
-│   └── create_routing_graph.py               # Build routing graph
+├── Backend (Server)
+│   ├── server.js                      # Node.js HTTP server + API endpoints
+│   └── package.json                   # Node.js project configuration
 │
-└── ML Notebooks:
-    └── ML_Weight_Prediction.ipynb            # Train ML models (future work)
+├── Data Processing Scripts (Python)
+│   ├── process_downtown_osm.py        # Extract streets/POIs from OpenStreetMap data
+│   ├── calculate_intersection_weights.py  # Calculate node weights with crime data
+│   ├── create_routing_graph.py        # Build complete routing graph structure
+│   ├── fetch_live_crimes.py           # Scrape and process live crime incidents
+│   ├── gemini_api.py                  # Gemini AI integration for chat feature
+│   ├── analyze_layers.py              # Analyze data layers and distributions
+│   ├── check_nodes.py                 # Validate node data
+│   └── explain_rates.py               # Crime rate calculation explanations
+│
+├── Data Files
+│   ├── Crime Data
+│   │   ├── Neighbourhood_Crime_Rates_Open_Data_*.csv      # 158 neighborhoods, 9 crime types
+│   │   └── Neighbourhood_Crime_Rates_Open_Data_*.geojson  # Neighborhood boundary polygons
+│   │
+│   ├── OpenStreetMap Data
+│   │   ├── planet_*.osm.geojson.xz    # Compressed OSM extract for Toronto
+│   │   ├── downtown_streets.geojson   # 22,448 street segments (processed)
+│   │   └── downtown_pois.geojson      # 19,487 points of interest (bars, shops, etc.)
+│   │
+│   └── Routing Graph Data
+│       ├── intersection_weights.csv        # 11,495 nodes with computed weights
+│       ├── intersection_weights.geojson    # Nodes in GeoJSON for visualization
+│       ├── routing_edges.csv               # 13,195 street edges with weights
+│       ├── routing_edges.geojson           # Edges in GeoJSON for visualization
+│       └── routing_graph.json              # Complete graph structure (9.8 MB)
+│
+├── Configuration
+│   ├── requirements.txt               # Python dependencies
+│   ├── .env                          # API keys (not in git, create locally)
+│   └── .gitignore                    # Git ignore rules
+│
+├── Documentation
+│   ├── README.md                     # This file
+│   └── test.ipynb                    # Jupyter notebook for testing/analysis
+│
+└── Cache
+    └── __pycache__/                  # Python bytecode cache (auto-generated)
 ```
 
-## 🛠️ Setup
+### Key Files Explained
+
+#### Frontend Files
+- **index.html** (140 lines): Main interface with map container, control panel, and UI elements
+- **app.js** (2161 lines): Core application logic including:
+  - Leaflet map initialization
+  - GeoJSON layer loading and rendering
+  - Color-coding algorithm for streets
+  - Event handlers for user interactions
+  - Live crime data fetching and display
+  - Route planning interface (in progress)
+- **style.css**: Dark theme optimized for nighttime use with high contrast
+
+#### Backend Files
+- **server.js** (161 lines): Simple Node.js HTTP server that:
+  - Serves static files (HTML, JS, CSS)
+  - Provides `/fetch-live-crimes` API endpoint
+  - Handles `/chat` endpoint for AI safety queries
+  - Returns JSON and GeoJSON data
+
+#### Data Processing Pipeline
+The Python scripts follow this workflow:
+
+```
+1. process_downtown_osm.py
+   └─→ Extracts streets and POIs from OSM
+       └─→ Outputs: downtown_streets.geojson, downtown_pois.geojson
+
+2. calculate_intersection_weights.py
+   └─→ Computes safety weights for each intersection
+       └─→ Uses: Crime data + POIs + street types
+       └─→ Outputs: intersection_weights.csv, intersection_weights.geojson
+
+3. create_routing_graph.py
+   └─→ Builds complete routing graph
+       └─→ Connects intersections with edges
+       └─→ Outputs: routing_graph.json, routing_edges.csv
+
+4. fetch_live_crimes.py (runs on-demand)
+   └─→ Scrapes live crime feeds
+       └─→ Uses Gemini AI to extract structured data
+       └─→ Geocodes locations
+       └─→ Returns JSON to frontend
+```
+
+### Data Flow
+
+```
+User Browser (index.html)
+    ↓
+    ├─→ Loads routing_edges.geojson (street visualization)
+    ├─→ Loads Neighbourhood_Crime_Rates.geojson (boundaries)
+    ├─→ Loads routing_graph.json (for pathfinding)
+    │
+    └─→ Clicks "Fetch Live Crime Data"
+         ↓
+      server.js (/fetch-live-crimes endpoint)
+         ↓
+      fetch_live_crimes.py
+         ├─→ Scrapes gtaupdate.com
+         ├─→ Calls Gemini AI API
+         └─→ Returns structured JSON
+              ↓
+         app.js displays incidents on map
+```
+
+## 💻 Installation
 
 ### Prerequisites
-- **Node.js** v14+ (JavaScript runtime)
-- **Python** 3.8+ (for data processing)
-- Python packages: `pandas`, `numpy`, `shapely`, `scikit-learn`
+- **Node.js** v14+ (JavaScript runtime) - [Download here](https://nodejs.org/)
+- **Python** 3.8+ (for data processing) - [Download here](https://www.python.org/)
+- **Git** (for cloning the repository)
 
-### Installation
+### Step-by-Step Installation
 
+#### 1. Clone the Repository
 ```bash
-# 1. Install Python dependencies
-pip install pandas numpy shapely scikit-learn
-
-# 2. Start the web server
-node server.js
-
-# 3. Open browser
-# Navigate to http://localhost:3000
+git clone https://github.com/Solarcemir/SafeSteps_AI.git
+cd SafeSteps_AI
 ```
+
+#### 2. Install Python Dependencies
+```bash
+# Using pip
+pip install -r requirements.txt
+
+# Or install packages individually
+pip install pandas numpy shapely scikit-learn beautifulsoup4 requests google-generativeai python-dotenv playwright
+```
+
+#### 3. (Optional) Set up Gemini API Key
+For live crime monitoring features, you'll need a Google Gemini API key:
+
+1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Create a new API key
+3. Create a `.env` file in the project root:
+```bash
+echo "GEMINI_API_KEY=your_api_key_here" > .env
+```
+
+**Note:** The app works without an API key using historical data. Live crime monitoring requires the API key.
+
+#### 4. Install Playwright (if using live crime monitoring)
+```bash
+playwright install
+```
+
+#### 5. Start the Server
+```bash
+node server.js
+```
+
+You should see:
+```
+🚀 Server running at http://localhost:3000/
+📍 SafeRoute AI - Toronto Risk Map
+Press Ctrl+C to stop the server
+```
+
+#### 6. Open Your Browser
+Navigate to **http://localhost:3000**
+
+The map will load with Toronto crime data visualized on the street network!
 
 ## 📍 Coverage Area
 
@@ -650,57 +960,137 @@ Using proven geospatial algorithms and cutting-edge AI, we accurately mapped are
 
 ---
 
-## 🚀 Quick Start
+## 🔑 API Configuration
 
-### **Prerequisites**
-- Node.js v14+ installed
-- Python 3.7+ installed
-- Internet connection (for map tiles and AI API)
+### Google Gemini API Setup
 
-### **Installation**
+The live crime monitoring feature uses Google's Gemini AI to analyze real-time crime feeds. Here's how to set it up:
+
+#### 1. Get Your API Key
+1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Sign in with your Google account
+3. Click "Create API Key"
+4. Copy the generated key
+
+#### 2. Configure the Application
+Create a `.env` file in the project root directory:
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/Solarcemir/Sheridan_Datathon.git
-cd Sheridan_Datathon
+# .env file
+GEMINI_API_KEY=your_actual_api_key_here
+```
 
-# 2. Install Python dependencies
-pip install pandas numpy shapely scikit-learn beautifulsoup4 requests google-generativeai python-dotenv
+**Security Note:** Never commit the `.env` file to git. It's already included in `.gitignore`.
 
-# 3. Set up environment variables (optional for AI features)
-# Create .env file with your Gemini API key:
-echo "GEMINI_API_KEY=your_api_key_here" > .env
+#### 3. Verify Configuration
+The application will automatically load the API key from the `.env` file. If configured correctly:
+- Click "🤖 Fetch Live Crime Data" button
+- Wait ~10 seconds for AI processing
+- Live incidents will appear on the map
 
-# 4. Start the server
+#### Without API Key
+The application works fully without an API key:
+- ✅ Historical crime data visualization
+- ✅ Street network with safety weights
+- ✅ Route planning (when implemented)
+- ❌ Live crime incident monitoring (requires API key)
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### 1. Server won't start - "Cannot find module"
+**Problem:** Node.js can't find required files.
+
+**Solution:**
+```bash
+# Make sure you're in the correct directory
+cd SafeSteps_AI
+ls -la  # Should see server.js, index.html, etc.
 node server.js
 ```
 
-### **Usage**
+#### 2. Python errors - "Module not found"
+**Problem:** Python dependencies not installed.
 
+**Solution:**
 ```bash
-# Server starts on http://localhost:3000
-🚀 Server running at http://localhost:3000/
-📍 SafeRoute AI - Toronto Risk Map
+# Install all dependencies
+pip install -r requirements.txt
+
+# Or install missing package individually
+pip install pandas  # Replace with missing package name
 ```
 
-**Open browser** → Navigate to `http://localhost:3000`
+#### 3. Map doesn't load - Blank screen
+**Problem:** Browser can't access static files or data files are missing.
 
-### **Features to Try**
+**Solution:**
+- Check browser console (F12) for errors
+- Verify all `.geojson` and `.json` files are present
+- Try refreshing the page (Ctrl+F5)
+- Check server logs for 404 errors
 
-1. **Explore Crime Heat Map**
-   - Pan/zoom around Toronto
-   - Streets colored green (safe) to red (dangerous)
-   - Neighborhood boundaries visible
+#### 4. Live crime data fails - "Failed to fetch incidents"
+**Problem:** API key not configured or invalid.
 
-2. **Fetch Live Incidents**
-   - Click "🤖 Fetch Live Crime Data" button
-   - Wait ~10 seconds for AI processing
-   - View consolidated popup with all incidents
-   - Red danger zones appear on map
+**Solution:**
+```bash
+# Verify .env file exists
+cat .env
 
-3. **Inspect Individual Incidents**
-   - Click any red marker
-   - See detailed popup with location, description, severity
+# Should show: GEMINI_API_KEY=your_key_here
+
+# Make sure there are no spaces around the = sign
+# Correct:   GEMINI_API_KEY=abc123
+# Incorrect: GEMINI_API_KEY = abc123
+```
+
+#### 5. Port 3000 already in use
+**Problem:** Another application is using port 3000.
+
+**Solution:**
+```bash
+# Option 1: Kill the process using port 3000 (Linux/Mac)
+lsof -ti:3000 | xargs kill -9
+
+# Option 2: Use a different port
+# Edit server.js, change PORT = 3000 to PORT = 3001
+```
+
+#### 6. Playwright installation fails
+**Problem:** Playwright browsers not installed.
+
+**Solution:**
+```bash
+# Install Playwright and browsers
+pip install playwright
+playwright install
+
+# Or install specific browser
+playwright install chromium
+```
+
+#### 7. CORS errors in browser console
+**Problem:** Browser blocking requests due to CORS policy.
+
+**Solution:** This shouldn't happen with the included server. If it does:
+- Make sure you're accessing `http://localhost:3000` (not opening `index.html` directly)
+- Check that server.js is running
+- Clear browser cache
+
+### Need More Help?
+
+If you encounter other issues:
+1. Check the [GitHub Issues](https://github.com/Solarcemir/SafeSteps_AI/issues) page
+2. Create a new issue with:
+   - Error message (full text)
+   - Operating system
+   - Node.js version (`node --version`)
+   - Python version (`python --version`)
+   - Steps to reproduce
 
 ---
 
@@ -822,6 +1212,91 @@ Sheridan_Datathon/
 ✅ Created intuitive dark-themed UI optimized for night safety  
 ✅ Generated production-ready weighted graph for pathfinding  
 ✅ Implemented robust fallback systems for API reliability  
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions to SafeRoute AI! Here's how you can help:
+
+### Ways to Contribute
+
+1. **Report Bugs**
+   - Use the [GitHub Issues](https://github.com/Solarcemir/SafeSteps_AI/issues) page
+   - Provide detailed description and steps to reproduce
+   - Include system information and error messages
+
+2. **Suggest Features**
+   - Open an issue with the "enhancement" label
+   - Describe the feature and its benefits
+   - Explain use cases
+
+3. **Improve Documentation**
+   - Fix typos or unclear instructions
+   - Add examples or tutorials
+   - Translate documentation
+
+4. **Submit Code**
+   - Fork the repository
+   - Create a feature branch (`git checkout -b feature/AmazingFeature`)
+   - Make your changes
+   - Test thoroughly
+   - Commit with clear messages (`git commit -m 'Add AmazingFeature'`)
+   - Push to your branch (`git push origin feature/AmazingFeature`)
+   - Open a Pull Request
+
+### Development Guidelines
+
+#### Code Style
+- **Python**: Follow PEP 8 style guide
+- **JavaScript**: Use ES6+ features, meaningful variable names
+- **Comments**: Explain "why", not "what"
+
+#### Testing
+- Test your changes locally before submitting
+- Ensure existing features still work
+- Add tests for new features when possible
+
+#### Commit Messages
+- Use clear, descriptive commit messages
+- Start with a verb (Add, Fix, Update, Remove)
+- Example: "Add geocoding fallback for missing locations"
+
+### Development Setup
+
+```bash
+# 1. Fork and clone your fork
+git clone https://github.com/YOUR_USERNAME/SafeSteps_AI.git
+cd SafeSteps_AI
+
+# 2. Create a new branch
+git checkout -b feature/my-new-feature
+
+# 3. Make changes and test
+node server.js  # Test the application
+
+# 4. Commit and push
+git add .
+git commit -m "Add my new feature"
+git push origin feature/my-new-feature
+
+# 5. Open a Pull Request on GitHub
+```
+
+### Areas Needing Contribution
+
+- [ ] Implement A* pathfinding algorithm for route calculation
+- [ ] Add mobile-responsive design
+- [ ] Create unit tests for Python data processing
+- [ ] Optimize map rendering for better performance
+- [ ] Add more crime data sources
+- [ ] Implement real-time traffic integration
+- [ ] Create REST API for external applications
+- [ ] Add multilingual support (French, Spanish, etc.)
+
+### Questions?
+
+Feel free to open an issue for questions or join our discussions!
 
 ---
 
