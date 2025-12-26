@@ -22,6 +22,7 @@
 - [Technical Details](#-technical-details)
 - [API Configuration](#-api-configuration)
 - [Troubleshooting](#-troubleshooting)
+- [FAQ](#-frequently-asked-questions-faq)
 - [Future Roadmap](#-future-roadmap)
 - [Tech Stack](#-tech-stack)
 - [Contributing](#-contributing)
@@ -705,6 +706,26 @@ The map shows **routing edges** color-coded by weight:
 2. **OpenStreetMap**: Street network, buildings, POIs
 3. **Spatial Analysis**: Point-in-polygon for neighborhood assignment
 
+### Data Files Included
+
+The repository includes pre-processed data files totaling ~50MB:
+
+| File | Size | Description |
+|------|------|-------------|
+| `routing_graph.json` | 5.4 MB | Complete graph structure with nodes, edges, weights |
+| `routing_edges.geojson` | 4.7 MB | Visualizable street edges with safety colors |
+| `intersection_weights.geojson` | 6.6 MB | All 11,495 intersections with computed weights |
+| `downtown_streets.geojson` | 15 MB | Raw street network (22,448 segments) |
+| `downtown_pois.geojson` | 11 MB | Points of interest (19,487 locations) |
+| `Neighbourhood_Crime_Rates.geojson` | 2.5 MB | 158 neighborhood boundaries |
+| `Neighbourhood_Crime_Rates.csv` | 285 KB | Crime statistics by neighborhood (2024) |
+| `intersection_weights.csv` | 2.2 MB | Node weights in CSV format |
+| `routing_edges.csv` | 1.1 MB | Edge weights in CSV format |
+
+**Total Data Size**: ~49 MB (pre-processed, ready to use)
+
+**Note**: The original OSM extract (`planet_*.osm.geojson.xz`) is compressed and not required for running the application.
+
 ### Calculation Pipeline
 
 ```
@@ -1212,6 +1233,83 @@ Sheridan_Datathon/
 ✅ Created intuitive dark-themed UI optimized for night safety  
 ✅ Generated production-ready weighted graph for pathfinding  
 ✅ Implemented robust fallback systems for API reliability  
+
+---
+
+## ❓ Frequently Asked Questions (FAQ)
+
+### General Questions
+
+**Q: Do I need an API key to use SafeRoute AI?**
+A: No! The application works fully without an API key using historical crime data. The Gemini API key is only required for the live crime monitoring feature (the "🤖 Fetch Live Crime Data" button).
+
+**Q: Is the crime data real?**
+A: Yes! We use official Toronto Open Data crime statistics from 2024 for 158 neighborhoods. The live incident monitoring (when API key is configured) pulls real-time data from Toronto crime feeds.
+
+**Q: How accurate are the safety scores?**
+A: Safety scores are calculated using official crime RATES (normalized by population) with a multi-factor algorithm. They represent relative risk, not absolute danger. Always use common sense and local knowledge.
+
+**Q: Can I use this for route navigation?**
+A: The pathfinding feature is currently in development. The graph structure is complete and ready for A* algorithm implementation. For now, you can visualize safety scores and manually plan routes.
+
+**Q: Does this work for areas outside downtown Toronto?**
+A: Currently optimized for downtown Toronto (43.629°N to 43.675°N). The methodology can be adapted to any city with open crime data and OpenStreetMap coverage.
+
+### Technical Questions
+
+**Q: Why do some streets have different colors on each side?**
+A: Streets are segments (edges) connecting intersections (nodes). Each intersection has its own safety weight. The street's color is the average of its two endpoints, so adjacent streets may differ.
+
+**Q: What does "weight" mean?**
+A: Weight is a 0-100 safety score for each intersection, where:
+- **0-30**: Safe (low crime, quiet area)
+- **30-60**: Moderate risk (mixed area)
+- **60-100**: High risk (high crime, busy area)
+
+**Q: How often is the data updated?**
+A: Historical crime data is updated when Toronto Open Data releases new statistics (typically quarterly). Live incident monitoring fetches real-time data when you click the button.
+
+**Q: Can I add my own crime data?**
+A: Yes! The system accepts standard CSV files with crime rates by neighborhood. You'll need to modify `calculate_intersection_weights.py` to process your data format.
+
+**Q: What's the difference between "crime count" and "crime rate"?**
+A: We use crime RATES (crimes per 100,000 residents), not raw counts. This accounts for population differences—a neighborhood with 100 crimes and 1,000 residents is more dangerous than one with 100 crimes and 100,000 residents.
+
+### Usage Questions
+
+**Q: The map is loading slowly. What can I do?**
+A: The initial load processes ~50MB of geospatial data. Tips:
+- Use a modern browser (Chrome, Firefox, Edge)
+- Disable browser extensions temporarily
+- Clear browser cache
+- Check your internet connection (map tiles load from CDN)
+
+**Q: Can I download the map for offline use?**
+A: The data files can work offline, but map tiles require internet. You could set up a local tile server for fully offline operation.
+
+**Q: How do I report incorrect data?**
+A: Open an issue on [GitHub Issues](https://github.com/Solarcemir/SafeSteps_AI/issues) with:
+- Location (intersection or street name)
+- What's incorrect (weight, crime data, etc.)
+- Expected vs actual values
+
+**Q: Can I use this data for research?**
+A: Yes! The MIT license allows academic and commercial use. Please cite the project and acknowledge Toronto Open Data as the crime data source.
+
+### Privacy & Safety Questions
+
+**Q: Does this app track my location?**
+A: No. SafeRoute AI runs entirely in your browser. We don't collect, store, or transmit any user data, including location.
+
+**Q: Is my API key secure?**
+A: Your Gemini API key is stored in the `.env` file on your local machine. It's never transmitted to anyone except Google's Gemini API. Never share your `.env` file or commit it to git.
+
+**Q: Should I rely on this for personal safety decisions?**
+A: SafeRoute AI is a visualization and research tool. It provides data-driven insights but should not be your only source of safety information. Always:
+- Use common sense and situational awareness
+- Follow local police recommendations
+- Trust your instincts
+- Consider time of day and other factors
 
 ---
 
