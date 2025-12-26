@@ -169,11 +169,13 @@ The map displays **13,195 street segments** color-coded by safety score:
 | 🟠 Orange | 60-80 | 9 | 0.07% | Entertainment districts, busy intersections |
 | 🔴 Red | 80-100 | 1 | 0.01% | Yonge-Dundas area, high-crime zones |
 
-**Key Insights:**
+**Key Insights** *(based on current dataset as of December 2024)*:
 - **72.5%** of downtown Toronto streets are classified as "safe"
 - Only **0.1%** of streets have critical risk levels
 - Entertainment districts and major intersections tend to have higher weights
 - Residential side streets consistently show low risk scores
+
+*Note: These statistics are calculated from the current routing graph data (13,195 edges) and may change if crime data or the street network is updated.*
 
 ---
 
