@@ -1,0 +1,20 @@
+# Core Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+shapely>=2.0.0
+scikit-learn>=1.3.0
+
+# Web Scraping
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+
+# AI Integration
+google-generativeai>=0.3.0
+python-dotenv>=1.0.0
+
+# Browser Automation (for gemini_api.py)
+playwright>=1.40.0
+
+# Geospatial Data
+# Note: For OSM data processing, you may need additional tools like osmium or pyosmium
+# These are optional depending on your use case
